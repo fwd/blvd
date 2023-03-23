@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta charset="UTF-8">
+        <title>Blvd.to</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+        <link rel='stylesheet' href='https://unpkg.com/leaflet@1.6.0/dist/leaflet.css'>
+        <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.css'>
+        <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.Default.css'>
+        <style>
+            html,
+            body {
+              width: 100%;
+              height: 100%;
+              padding: 0;
+              margin: 0;
+            }
+            
+            #map {
+              width: 100%;
+              height: 100%;
+            }
+            
+            .marker-cluster-small {
+              background-color: rgba(181, 226, 140, 0.6);
+            }
+            
+            .marker-cluster-small div {
+              background-color: rgba(110, 204, 57, 0.6);
+            }
+            
+            .marker-cluster-medium {
+              background-color: rgba(241, 211, 87, 0.6);
+            }
+            
+            .marker-cluster-medium div {
+              background-color: rgba(240, 194, 12, 0.6);
+            }
+            
+            .marker-cluster-large {
+              background-color: rgba(253, 156, 115, 0.6);
+            }
+            
+            .marker-cluster-large div {
+              background-color: rgba(241, 128, 23, 0.6);
+            }
+            
+            .marker-cluster {
+              background-clip: padding-box;
+              border-radius: 20px;
+            }
+            
+            .marker-cluster div {
+              width: 30px;
+              height: 30px;
+              margin-left: 5px;
+              margin-top: 5px;
+              text-align: center;
+              border-radius: 15px;
+              font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+            }
+            
+            .marker-cluster span {
+              line-height: 30px;
+            }
+            
+            .search {
+              position: absolute;
+              top: 10px;
+              left: 60px;
+              z-index: 999;
+            }
+
+            .location {
+    position: fixed;
+    top: 70px;
+    left: 11px;
+    z-index: 9999999999;
+    width: 25px;
+    height: 25px;
+    background: white;
+    padding: 3px;
+    border-radius: 5px;
+    box-sizing: border-box;
+            }
+
+            .search input {
+              padding: 10px 20px;
+            }
+
+            .leaflet-control-zoom-out, .leaflet-control-zoom-in {
+                display: none;
+            }
+
+        </style>
+    </head>
+    
+    <body>
+
+        <!-- partial:index.partial.html -->
+        <div id="map"></div>
+
+        <div class="location" onclick="getLocation()">
+            <?xml version="1.0" ?><svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg"><title/><g><path d="M90,42H83.3936A35.9331,35.9331,0,0,0,54,12.6064V6A6,6,0,0,0,42,6v6.6064A35.9331,35.9331,0,0,0,12.6064,42H6A6,6,0,0,0,6,54h6.6064A35.9331,35.9331,0,0,0,42,83.3936V90a6,6,0,0,0,12,0V83.3936A35.9331,35.9331,0,0,0,83.3936,54H90a6,6,0,0,0,0-12ZM48,72A24,24,0,1,1,72,48,24.0238,24.0238,0,0,1,48,72Z"/><path d="M48,36A12,12,0,1,0,60,48,12.0157,12.0157,0,0,0,48,36Z"/></g></svg>
+        </div>
+
+        <div class="search" style="display: none;">
+            <form>
+                <input type="text" placeholder="Search" />
+            </form>
+        </div>
+
+        <!-- partial -->
+        <script src='https://unpkg.com/leaflet@1.6.0/dist/leaflet.js'></script>
+        
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/leaflet.markercluster.js'></script>
+
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.js'></script>
+
+        <script>
+
+            function goToLocation(position) {
+                // console.log( ,  )
+                map.flyTo(new L.LatLng(position.coords.latitude, position.coords.longitude), 14);
+            }
+
+            function getLocation() {
+
+                if (navigator.geolocation) {
+                    return navigator.geolocation.getCurrentPosition(goToLocation);
+                } else {
+                    window.alert("Geolocation not provided.")
+                }
+
+            }
+
+            const urlParams = new URLSearchParams(window.location.search)
+
+            var dataset = urlParams.get('dataset') || urlParams.get('map') || urlParams.get('url')
+
+            if (dataset && dataset.includes('@')) {
+                dataset = `https://raw.githubusercontent.com/${dataset}/master/points.json`
+            }
+
+            ;(function(){
+             
+              // Register the service worker
+              // if ('serviceWorker' in navigator) {
+              //   navigator.serviceWorker.register("/sw.js").then((registration) => {
+              //     // Registration was successful
+              //   }).catch((error) => {
+              //     // Registration failed
+              //   });
+              // }
+
+              // var dataset = urlParams.get('dataset') || urlParams.get('url')
+
+              // 新增地圖
+              window.map = L.map("map", {
+                center: [25.761681, -80.191788],
+                zoom: 11
+              });
+            
+              // 地圖圖資
+              L.tileLayer("https://api.fwd.dev/map/{s}/{z}/{x}/{y}.png", {
+               // 地圖圖資
+              // L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                attribution:
+                  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              }).addTo(map);
+            
+              // 新增地標，並且是使用 MarkerCluster 這個套件
+              // var markers = new L.MarkerClusterGroup().addTo(map);
+            
+            var markers = new L.MarkerClusterGroup().addTo(map);
+
+
+            function load() {
+                axios.get(dataset)
+                  .then(res => {
+
+                    // // 是遠端
+                    const places = res.data.features;
+                  
+                    // // 以及篩選地區的值
+                    // findStore(places, "");
+
+                    for (var item of places) {
+                        // console.log(item.properties.icon)
+                        // Icon options
+var iconOptions = {
+   iconUrl: item.properties.icon,
+   iconSize: [50, 50]
+}
+
+// Creating a custom icon
+var customIcon = L.icon(iconOptions);
+
+// Options for the marker
+var markerOptions = {
+   clickable: true,
+   // draggable: true,
+   icon: customIcon
+}
+                        
+                        markers.addLayer(
+                            L.marker([item.geometry.coordinates[1], item.geometry.coordinates[0]], markerOptions).bindPopup(item.properties.html)
+                        )
+
+                        // map.addLayer(markers)
+
+                    }
+
+                  });
+              }
+              
+                map.on('click', function(e) {        
+                  console.log(e.latlng)     
+                });
+
+                load();
+            
+            })();
+            
+
+        </script>
+
+    </body>
+
+</html>
