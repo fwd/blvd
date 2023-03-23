@@ -8,7 +8,7 @@
         <meta name="apple-mobile-web-app-status-bar-style" content="black">
         <meta name="apple-mobile-web-app-title" content="Blvd">
         <link rel="apple-touch-icon" href="icon.png">
-        <title>Blvd.to</title>
+        <title>Blvd - Online Map</title>
         <link rel="stylesheet" href="css/normalize.min.css">
         <link rel='stylesheet' href='css/leaflet.css'>
         <link rel='stylesheet' href='css/MarkerCluster.css'>
@@ -171,9 +171,8 @@
               // 地圖圖資
               L.tileLayer(tileset, {
                 subdomains,
-                maxZoom: 24,
-                attribution:
-                  'Google'
+                maxZoom: 21,
+                attribution: 'Google'
               }).addTo(map);
             
               

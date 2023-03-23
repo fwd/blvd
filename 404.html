@@ -2,13 +2,17 @@
 <html lang="en">
     
     <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         <meta charset="UTF-8">
-        <title>Blvd.to</title>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
-        <link rel='stylesheet' href='https://unpkg.com/leaflet@1.6.0/dist/leaflet.css'>
-        <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.css'>
-        <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/MarkerCluster.Default.css'>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <meta name="apple-mobile-web-app-title" content="Blvd">
+        <link rel="apple-touch-icon" href="icon.png">
+        <title>Blvd - Online Map</title>
+        <link rel="stylesheet" href="css/normalize.min.css">
+        <link rel='stylesheet' href='css/leaflet.css'>
+        <link rel='stylesheet' href='css/MarkerCluster.css'>
+        <link rel='stylesheet' href='css/MarkerCluster.Default.css'>
         <style>
             html,
             body {
@@ -74,16 +78,16 @@
             }
 
             .location {
-    position: fixed;
-    top: 70px;
-    left: 11px;
-    z-index: 9999999999;
-    width: 25px;
-    height: 25px;
-    background: white;
-    padding: 3px;
-    border-radius: 5px;
-    box-sizing: border-box;
+                position: fixed;
+                bottom: 30px;
+                right: 18px;
+                z-index: 9999999999;
+                width: 45px;
+                height: 45px;
+                background: white;
+                padding: 9px;
+                border-radius: 5px;
+                box-sizing: border-box;
             }
 
             .search input {
@@ -91,7 +95,7 @@
             }
 
             .leaflet-control-zoom-out, .leaflet-control-zoom-in {
-                display: none;
+                display: none !important;
             }
 
         </style>
@@ -113,11 +117,11 @@
         </div>
 
         <!-- partial -->
-        <script src='https://unpkg.com/leaflet@1.6.0/dist/leaflet.js'></script>
+        <script src='js/leaflet.js'></script>
         
-        <script src='https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.4.1/leaflet.markercluster.js'></script>
+        <script src='js/leaflet.markercluster.js'></script>
 
-        <script src='https://cdnjs.cloudflare.com/ajax/libs/axios/0.19.2/axios.js'></script>
+        <script src='js/axios.js'></script>
 
         <script>
 
@@ -138,7 +142,11 @@
 
             const urlParams = new URLSearchParams(window.location.search)
 
-            var dataset = urlParams.get('dataset') || urlParams.get('map') || urlParams.get('url')
+            var type  = urlParams.get('type') || 'hybrid'
+            var tileset  = urlParams.get('tiles') || urlParams.get('server') || "https://map.blvd.to/{s}/{z}/{x}/{y}?type=" + type
+            var dataset = urlParams.get('points') || urlParams.get('map') || urlParams.get('url')
+            var center = urlParams.get('center') ? urlParams.get('center').split(',') : [25.761681, -80.191788]
+            var subdomains = urlParams.get('subdomains') ? urlParams.get('subdomains').split(',') : ['mt0','mt1','mt2','mt3']
 
             if (dataset && dataset.includes('@')) {
                 dataset = `https://raw.githubusercontent.com/${dataset}/master/points.json`
@@ -155,25 +163,19 @@
               //   });
               // }
 
-              // var dataset = urlParams.get('dataset') || urlParams.get('url')
-
-              // 新增地圖
               window.map = L.map("map", {
-                center: [25.761681, -80.191788],
+                center,
                 zoom: 11
               });
             
               // 地圖圖資
-              L.tileLayer("https://api.fwd.dev/map/{s}/{z}/{x}/{y}.png", {
-               // 地圖圖資
-              // L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                attribution:
-                  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              L.tileLayer(tileset, {
+                subdomains,
+                maxZoom: 21,
+                attribution: 'Google'
               }).addTo(map);
             
-              // 新增地標，並且是使用 MarkerCluster 這個套件
-              // var markers = new L.MarkerClusterGroup().addTo(map);
-            
+              
             var markers = new L.MarkerClusterGroup().addTo(map);
 
 
@@ -181,8 +183,28 @@
                 axios.get(dataset)
                   .then(res => {
 
+
+                    if (res.data.features) {
+                        var places = res.data.features;
+                    } else {
+                        var places = res.data.map(a => {
+                            return  {
+                                "type": a.type || "Feature",
+                                "properties": {
+                                    "icon": a.icon,
+                                    "name": a.name || a.title,
+                                    "html": a.body || a.html
+                                },
+                                "geometry": {
+                                    "type": "Point",
+                                    "coordinates": [Number(a.lon), Number(a.lat)]
+                                }
+                            }
+                        })
+                    }
+
                     // // 是遠端
-                    const places = res.data.features;
+                    // console.log(  places )
                   
                     // // 以及篩選地區的值
                     // findStore(places, "");
