@@ -153,10 +153,14 @@
 
             var center = coordinates ? coordinates.split(',') : [25.761681, -80.191788]
 
-            if (pathname && pathname.includes(',')) center = pathname.split(',')
-           
             if (pathname && pathname.includes('@')) {
+                
                 dataset = `https://gist.githubusercontent.com/${pathname.replace('@', '')}/raw/${urlParams.get('file') || 'points'}.json`
+
+            } else {
+                
+                if (pathname && pathname.includes(',')) center = pathname.split(',')
+
             }
 
             ;(function(){
