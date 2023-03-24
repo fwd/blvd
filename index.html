@@ -177,15 +177,12 @@
                 attribution: 'Google'
               }).addTo(map);
             
-              
             var markers = new L.MarkerClusterGroup().addTo(map);
 
-
             function load() {
+                markers.clearLayers()
                 axios.get(dataset)
                   .then(res => {
-
-
                     if (res.data.features) {
                         var places = res.data.features;
                     } else {
@@ -204,39 +201,23 @@
                             }
                         })
                     }
-
-                    // // 是遠端
-                    // console.log(  places )
-                  
-                    // // 以及篩選地區的值
-                    // findStore(places, "");
-
                     for (var item of places) {
-                        // console.log(item.properties.icon)
-                        // Icon options
-var iconOptions = {
-   iconUrl: item.properties.icon,
-   iconSize: [50, 50]
-}
-
-// Creating a custom icon
-var customIcon = L.icon(iconOptions);
-
-// Options for the marker
-var markerOptions = {
-   clickable: true,
-   // draggable: true,
-   icon: customIcon
-}
-                        
+                        var iconOptions = {
+                           iconUrl: item.properties.icon,
+                           iconSize: [50, 50]
+                        }
+                        // Creating a custom icon
+                        var customIcon = L.icon(iconOptions);
+                        // Options for the marker
+                        var markerOptions = {
+                           clickable: true,
+                           // draggable: true,
+                           icon: customIcon
+                        }
                         markers.addLayer(
                             L.marker([item.geometry.coordinates[1], item.geometry.coordinates[0]], markerOptions).bindPopup(item.properties.html)
                         )
-
-                        // map.addLayer(markers)
-
                     }
-
                   });
               }
               
@@ -244,7 +225,13 @@ var markerOptions = {
                   console.log(e.latlng)     
                 });
 
-                load();
+                if (dataset) load()
+
+                if ( dataset && (urlParams.get('refresh') || urlParams.get('a') || urlParams.get('auto')) ) {
+                    setInterval(() => {
+                        load()
+                    }, 5000)
+                }
             
             })();
             
