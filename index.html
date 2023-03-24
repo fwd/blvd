@@ -146,16 +146,20 @@
             var zoom  = urlParams.get('zoom') || 12
             var type  = urlParams.get('type') || 'hybrid'
             var tileset  = urlParams.get('tiles') || urlParams.get('server') || "https://map.blvd.to/{s}/{z}/{x}/{y}?type=" + type
-            var dataset = urlParams.get('points') || urlParams.get('map') || urlParams.get('url')
+            var dataset = urlParams.get('points') || urlParams.get('map') || urlParams.get('github') || urlParams.get('bin')
             var subdomains = urlParams.get('subdomains') ? urlParams.get('subdomains').split(',') : ['mt0','mt1','mt2','mt3']
             
-            var coordinates = urlParams.get('p')
+            var coordinates = ''
 
             const pathname = window.location.pathname.replace('/', '') || 'miami'
 
             var center = coordinates ? coordinates.split(',') : [25.761681, -80.191788]
 
             if (pathname && pathname.includes(',')) center = pathname.split(',')
+           
+            if (dataset && dataset.includes('@')) {
+                dataset = `https://raw.githubusercontent.com/${dataset}/master/points.json`
+            }
             
             if (pathname === 'cuba') {
                 center = [22.088066009138952, -79.54229618971492]
@@ -172,8 +176,8 @@
                 zoom = 11
             }
 
-            if (dataset && dataset.includes('@')) {
-                dataset = `https://raw.githubusercontent.com/${dataset}/master/points.json`
+            if (dataset && dataset.includes('$')) {
+                dataset = `https://api.fwd.dev/${dataset}`
             }
 
             ;(function(){
