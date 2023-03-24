@@ -156,7 +156,7 @@
             if (pathname && pathname.includes(',')) center = pathname.split(',')
            
             if (pathname && pathname.includes('@')) {
-                dataset = `https://gist.githubusercontent.com/${pathname}/raw/${urlParams.get('file') || 'points'}.json`
+                dataset = `https://gist.githubusercontent.com/${pathname.replace('@', '')}/raw/${urlParams.get('file') || 'points'}.json`
             }
 
             ;(function(){
