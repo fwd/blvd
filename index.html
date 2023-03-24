@@ -144,7 +144,7 @@
 
             var zoom  = urlParams.get('zoom') || 12
             var type  = urlParams.get('type') || 'hybrid'
-            var tileset  = urlParams.get('tiles') || urlParams.get('server') || "https://map.blvd.to/{s}/{z}/{x}/{y}"
+            var tileset  = urlParams.get('tiles') || urlParams.get('server') || `https://map.blvd.to/{s}/{z}/{x}/{y}?type=${type}`
             var dataset = urlParams.get('points') || urlParams.get('map') || urlParams.get('github') || urlParams.get('bin')
             var subdomains = urlParams.get('subdomains') ? urlParams.get('subdomains').split(',') : ['mt0','mt1','mt2','mt3']
             
