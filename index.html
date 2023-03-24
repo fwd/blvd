@@ -143,11 +143,34 @@
 
             const urlParams = new URLSearchParams(window.location.search)
 
+            var zoom  = urlParams.get('zoom') || 12
             var type  = urlParams.get('type') || 'hybrid'
             var tileset  = urlParams.get('tiles') || urlParams.get('server') || "https://map.blvd.to/{s}/{z}/{x}/{y}?type=" + type
             var dataset = urlParams.get('points') || urlParams.get('map') || urlParams.get('url')
-            var center = urlParams.get('center') ? urlParams.get('center').split(',') : [25.761681, -80.191788]
             var subdomains = urlParams.get('subdomains') ? urlParams.get('subdomains').split(',') : ['mt0','mt1','mt2','mt3']
+            
+            var coordinates = urlParams.get('p')
+
+            const pathname = window.location.pathname.replace('/', '') || 'miami'
+
+            var center = coordinates ? coordinates.split(',') : [25.761681, -80.191788]
+
+            if (pathname && pathname.includes(',')) center = pathname.split(',')
+            
+            if (pathname === 'cuba') {
+                center = [22.088066009138952, -79.54229618971492]
+                zoom = 6
+            }
+
+            if (pathname === 'holguin') {
+                center = [20.882308754844466, -75.93557741770721]
+                zoom = 9
+            }
+
+            if (pathname === 'miami') {
+                center = [25.772753240358124, -80.28058831592516]
+                zoom = 11
+            }
 
             if (dataset && dataset.includes('@')) {
                 dataset = `https://raw.githubusercontent.com/${dataset}/master/points.json`
@@ -166,7 +189,7 @@
 
               window.map = L.map("map", {
                 center,
-                zoom: 11
+                zoom
               });
             
               // 地圖圖資
