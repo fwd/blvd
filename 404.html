@@ -158,7 +158,7 @@
             if (pathname && pathname.includes(',')) center = pathname.split(',')
            
             if (pathname && pathname.includes('@')) {
-                dataset = `https://raw.githubusercontent.com/${pathname}/master/${urlParams.get('file') || 'points'}.json`
+                dataset = `https://gist.githubusercontent.com/${pathname}/raw/${urlParams.get('file') || 'points'}.json`
                 // center = [22.088066009138952, -79.54229618971492]
                 // zoom = 6
             }
