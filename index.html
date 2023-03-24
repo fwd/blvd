@@ -10,10 +10,10 @@
         <link rel="apple-touch-icon" href="icon.png">
         <link rel="icon" type="image/png" href="favicon.png" />
         <title>Online Map - Blvd</title>
-        <link rel="stylesheet" href="css/normalize.min.css">
-        <link rel='stylesheet' href='css/leaflet.css'>
-        <link rel='stylesheet' href='css/MarkerCluster.css'>
-        <link rel='stylesheet' href='css/MarkerCluster.Default.css'>
+        <link rel="stylesheet" href="../../css/normalize.min.css">
+        <link rel='stylesheet' href='../../css/leaflet.css'>
+        <link rel='stylesheet' href='../../css/MarkerCluster.css'>
+        <link rel='stylesheet' href='../../css/MarkerCluster.Default.css'>
         <style>
             html,
             body {
@@ -118,11 +118,9 @@
         </div>
 
         <!-- partial -->
-        <script src='js/leaflet.js'></script>
-        
-        <script src='js/leaflet.markercluster.js'></script>
-
-        <script src='js/axios.js'></script>
+        <script src='../../js/leaflet.js'></script>
+        <script src='../../js/leaflet.markercluster.js'></script>
+        <script src='../../js/axios.js'></script>
 
         <script>
 
@@ -159,42 +157,9 @@
            
             if (pathname && pathname.includes('@')) {
                 dataset = `https://gist.githubusercontent.com/${pathname}/raw/${urlParams.get('file') || 'points'}.json`
-                // center = [22.088066009138952, -79.54229618971492]
-                // zoom = 6
             }
-
-            if (pathname === 'cuba') {
-                center = [22.088066009138952, -79.54229618971492]
-                zoom = 6
-            }
-
-            if (pathname === 'holguin') {
-                center = [20.882308754844466, -75.93557741770721]
-                zoom = 9
-            }
-
-            if (pathname === 'miami') {
-                center = [25.772753240358124, -80.28058831592516]
-                zoom = 11
-            }
-
-            // if (dataset && dataset.includes('@')) {
-            // }
-
-            // if (dataset && dataset.includes('$')) {
-            //     dataset = `https://gist.githubusercontent.com/${dataset}/raw/${urlParams.get('file') || 'points'}.json`
-            // }
 
             ;(function(){
-             
-              // Register the service worker
-              // if ('serviceWorker' in navigator) {
-              //   navigator.serviceWorker.register("/sw.js").then((registration) => {
-              //     // Registration was successful
-              //   }).catch((error) => {
-              //     // Registration failed
-              //   });
-              // }
 
               window.map = L.map("map", {
                 center,
