@@ -14,6 +14,14 @@
         <link rel='stylesheet' href='../../css/leaflet.css'>
         <link rel='stylesheet' href='../../css/MarkerCluster.css'>
         <link rel='stylesheet' href='../../css/MarkerCluster.Default.css'>
+        <style>
+            .dark-mode {
+                filter: invert(1);
+            }
+            .dark-mode #map {
+                filter: hue-rotate(-205deg);
+            }
+        </style>
         <script src="https://metrics.bar/js/script.js" id="metrics" async defer></script>
         <style>
             html,
@@ -118,6 +126,15 @@
             </form>
         </div>
 
+        <script>
+            window.darkMode = false
+            if ( window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ) {
+                document.documentElement.className += 'dark-mode'
+                document.documentElement.style.backgroundColor = '#202124'
+                window.darkMode = true
+            } 
+        </script>
+
         <!-- partial -->
         <script src='../../js/leaflet.js'></script>
         <script src='../../js/leaflet.markercluster.js'></script>
@@ -144,8 +161,8 @@
 
             var zoom  = urlParams.get('zoom') || 12
             var type  = urlParams.get('type') || 'hybrid'
-            var tileset  = urlParams.get('tiles') || urlParams.get('server') || `https://map.blvd.to/{s}/{z}/{x}/{y}?type=${type}`
-            var dataset = urlParams.get('points') || urlParams.get('map') || urlParams.get('github') || urlParams.get('bin')
+            var tileset  = urlParams.get('map') || urlParams.get('server') || `https://map.blvd.to/{s}/{z}/{x}/{y}?type=${type}`
+            var dataset = urlParams.get('url') || urlParams.get('points') || urlParams.get('github') || urlParams.get('gist')
             var subdomains = urlParams.get('subdomains') ? urlParams.get('subdomains').split(',') : ['mt0','mt1','mt2','mt3']
             
             var coordinates = ''
@@ -169,14 +186,14 @@
               window.map = L.map("map", {
                 center,
                 zoom
-              });
+              })
             
               // 地圖圖資
-              L.tileLayer(tileset, {
+              var gridLayer = L.tileLayer(tileset, {
                 subdomains,
                 maxZoom: 21,
                 attribution: 'Google'
-              }).addTo(map);
+              }).addTo(map)
             
             var markers = new L.MarkerClusterGroup().addTo(map);
 
@@ -221,9 +238,63 @@
                     }
                   });
               }
+
+              if (typeof(Number.prototype.toRad) === "undefined") {
+                  Number.prototype.toRad = function() {
+                    return this * Math.PI / 180;
+                  }
+                }
+
+                // function getTileForCoordAndZoom(coord, zoom, callback) {
+                //   gridLayer.on('tileload', function(evt) {
+                //     gridLayer.off('tileload');
+                //     callback(evt.coords);
+                //   }); 
+                //   gridmap.setView(coord, zoom);
+                // }
+
+
+              function getTileURL2(lat, lon, zoom) {
+                    let xtile = parseInt(Math.floor((lon + 180) / 360 * (1 << zoom)));
+                    let ytile = parseInt(Math.floor((1 - Math.log(Math.tan(lat.toRad()) + 1 / Math.cos(lat.toRad())) / Math.PI) / 2 * (1 << zoom)));
+                    return `https://map.blvd.to/mt2/${zoom}/${xtile}/${ytile}`;
+                }
+
+                function getTileURL(lat, lon, zoom) {
+                    let xtile = parseInt(Math.floor((lon + 180) / 360 * (1 << zoom)));
+                    let ytile = parseInt(Math.floor((1 - Math.log(Math.tan(lat.toRad()) + 1 / Math.cos(lat.toRad())) / Math.PI) / 2 * (1 << zoom)));
+                    // let ytile = parseInt(Math.floor((1 - Math.log(Math.tan(lat.toRad()) + 1 / Math.cos(lat.toRad())) / Math.PI) / 2 * (1 << zoom)));
+                    return `https://map.blvd.to/mt2/${zoom}/${xtile}/${ytile}`;
+                    // return xtile + "/" + ytile;
+                }
+
+
+                // }
               
+                // function divideBy(num) {
+                //     this.x /= num;
+                //     this.y /= num;
+                //     return this;
+                // }
+
                 map.on('click', function(e) {        
-                  console.log(e.latlng)     
+                    // console.log( gridLayer._tileZoom )     
+                    // var layerPoint = 
+                    // console.log( map.project )
+                    // var layerPoint = map.project(e.latlng).divideBy(256).floor();
+                    // console.log(layerPoint.x, layerPoint.y);
+                  // console.log( map.latlngtoContainerPoint )     
+                  // console.log( map.latlngtoContainerPoint(e.latlng) )     
+                var item = { 
+                    lat: (e.latlng.lat).toFixed(12), 
+                    lon: (e.latlng.lng).toFixed(12), 
+                    zoom: gridLayer._tileZoom, 
+                    tile: getTileURL(e.latlng.lat, e.latlng.lng, gridLayer._tileZoom) 
+                }
+                  console.log(`console.log( "${item.tile}", lngLatToTile([${item.lon}, ${item.lat}], ${item.zoom}), lngLatToTile([${item.lon}, ${item.lat}], ${item.zoom}) === '${item.tile}' )`)     
+                  // getTileForCoordAndZoom([e.latlng.lat, e.latlng.lng], zoom, function(tileCoord) {
+                  //     console.log("tileCoord", tileCoord);
+                  //   });
                 });
 
                 if (dataset) load()
