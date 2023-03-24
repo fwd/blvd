@@ -157,10 +157,12 @@
 
             if (pathname && pathname.includes(',')) center = pathname.split(',')
            
-            if (dataset && dataset.includes('@')) {
-                dataset = `https://raw.githubusercontent.com/${dataset}/master/points.json`
+            if (pathname && pathname.includes('@')) {
+                dataset = `https://raw.githubusercontent.com/${pathname}/master/${urlParams.get('file') || 'points'}.json`
+                // center = [22.088066009138952, -79.54229618971492]
+                // zoom = 6
             }
-            
+
             if (pathname === 'cuba') {
                 center = [22.088066009138952, -79.54229618971492]
                 zoom = 6
@@ -176,9 +178,12 @@
                 zoom = 11
             }
 
-            if (dataset && dataset.includes('$')) {
-                dataset = `https://api.fwd.dev/${dataset}`
-            }
+            // if (dataset && dataset.includes('@')) {
+            // }
+
+            // if (dataset && dataset.includes('$')) {
+            //     dataset = `https://gist.githubusercontent.com/${dataset}/raw/${urlParams.get('file') || 'points'}.json`
+            // }
 
             ;(function(){
              
