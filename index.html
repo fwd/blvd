@@ -113,6 +113,24 @@
                 display: none !important;
             }
 
+            #create {
+                position: fixed;
+                z-index: 9999999999;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                height: 100%;
+                width: 100%;
+                background: #FFF;
+                display: flex;
+                align-items: center;
+                flex-direction: column;
+            }
+
+            .leaflet-popup-content {
+                zoom: 1.3;
+            }
+
         </style>
     </head>
     
@@ -123,6 +141,55 @@
 
         <div id="location" class="location " onclick="toggleLocation()">
             <?xml version="1.0" ?><svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg"><title/><g><path d="M90,42H83.3936A35.9331,35.9331,0,0,0,54,12.6064V6A6,6,0,0,0,42,6v6.6064A35.9331,35.9331,0,0,0,12.6064,42H6A6,6,0,0,0,6,54h6.6064A35.9331,35.9331,0,0,0,42,83.3936V90a6,6,0,0,0,12,0V83.3936A35.9331,35.9331,0,0,0,83.3936,54H90a6,6,0,0,0,0-12ZM48,72A24,24,0,1,1,72,48,24.0238,24.0238,0,0,1,48,72Z"/><path d="M48,36A12,12,0,1,0,60,48,12.0157,12.0157,0,0,0,48,36Z"/></g></svg>
+        </div>
+
+        <form id="create" style="display: none">
+            
+            <h2>Add New Point</h2>
+
+            <select id="type">
+                <option value="chicken">chicken</option>
+                <option value="bar">bar</option>
+                <option value="blue">alert</option>
+                <option value="burger">burger</option>
+                <option value="casino">casino</option>
+                <option value="clothing">clothing</option>
+                <option value="cops">cops</option>
+                <option value="disco">disco</option>
+
+                <option value="food">food</option>
+                <option value="garage">mechanic</option>
+
+                <option value="gun">gun</option>
+                <option value="gym">gym</option>
+                <option value="home">home</option>
+                <option value="hospital">hospital</option>
+                <option value="house">house</option>
+                <option value="mazda">mazda</option>
+                <option value="money">money</option>
+                <!-- <option value="motor">motor</option> -->
+                <!-- <option value="nano">nano</option> -->
+                <option value="owned">owned</option>
+                <option value="pin">pin</option>
+                <option value="pizza">pizza</option>
+                <option value="race">race</option>
+                <option value="satellite">satellite</option>
+                <option value="smoothie">smoothie</option>
+                <option value="space">space</option>
+                <option value="special">special</option>
+                <option value="target">target</option>
+                <option value="tattoos">tattoos</option>
+                <option value="unknown">unknown</option>
+
+            </select>
+
+            <textarea id="body" cols="30" rows="10"></textarea>
+
+            <input type="submit" value="Submit">
+            <br>
+            <br>
+            <a href="" onclick="cancel(); return false">Cancel</a>
+
         </div>
 
         <div class="search" style="display: none;">
@@ -152,6 +219,47 @@
             window.enabled = false
 
             window.last_known = null
+
+            let createForm = document.getElementById("create")
+
+            // createForm.style.display = "none"
+
+            function cancel(coords) {
+                document.getElementById("title") ? document.getElementById("title").value = "" : ''
+                document.getElementById("type") ? document.getElementById("type").value = "" : ''
+                document.getElementById("body") ? document.getElementById("body").value = "" : ''
+                createForm.style.display = "none"
+            }
+
+            function createNew(coords) {
+
+                createForm.style.display = "block"
+
+                createForm.addEventListener("submit", (e) => {
+
+                    e.preventDefault();
+
+                    let type = document.getElementById("type").value;
+                    let body = document.getElementById("body").value;
+
+                    if (!body) return
+
+                    // console.log()
+                    var points = localStorage.getItem('points') ? JSON.parse(localStorage.getItem('points')) : []
+
+                    points.push({ type, html: body, coords })
+
+                    localStorage.setItem('points', JSON.stringify(points))
+
+                    setTimeout(() => {
+                        loadLocalPoints()
+                    }, 200)
+
+                    cancel()
+
+                })
+
+            }
 
             function goToLocation(position) {
 
@@ -257,6 +365,28 @@
             
             window.markers = new L.MarkerClusterGroup().addTo(map);
 
+            window.loadLocalPoints = function() {
+                window.markers.clearLayers();
+                var points = localStorage.getItem('points') ? JSON.parse(localStorage.getItem('points')) : []
+                for (var item of points) {
+                    var iconOptions = {
+                       iconUrl: `icons/${item.type}.png`,
+                       iconSize: [50, 50]
+                    }
+                    // Creating a custom icon
+                    var customIcon = L.icon(iconOptions);
+                    // Options for the marker
+                    var markerOptions = {
+                       clickable: true,
+                       // draggable: true,
+                       icon: customIcon
+                    }
+                    markers.addLayer(
+                        L.marker([item.coords[0], item.coords[1]], markerOptions).bindPopup(item.html)
+                    )
+                }
+            }
+
             function load() {
                 markers.clearLayers()
                 axios.get(dataset)
@@ -305,14 +435,6 @@
                   }
                 }
 
-                // function getTileForCoordAndZoom(coord, zoom, callback) {
-                //   gridLayer.on('tileload', function(evt) {
-                //     gridLayer.off('tileload');
-                //     callback(evt.coords);
-                //   }); 
-                //   gridmap.setView(coord, zoom);
-                // }
-
 
               function getTileURL2(lat, lon, zoom) {
                     let xtile = parseInt(Math.floor((lon + 180) / 360 * (1 << zoom)));
@@ -338,26 +460,21 @@
                 // }
 
                 map.on('click', function(e) {        
-                    // console.log( gridLayer._tileZoom )     
-                    // var layerPoint = 
-                    // console.log( map.project )
-                    // var layerPoint = map.project(e.latlng).divideBy(256).floor();
-                    // console.log(layerPoint.x, layerPoint.y);
-                  // console.log( map.latlngtoContainerPoint )     
-                  // console.log( map.latlngtoContainerPoint(e.latlng) )     
-                var item = { 
-                    lat: (e.latlng.lat).toFixed(12), 
-                    lon: (e.latlng.lng).toFixed(12), 
-                    zoom: gridLayer._tileZoom, 
-                    tile: getTileURL(e.latlng.lat, e.latlng.lng, gridLayer._tileZoom) 
-                }
-                  console.log(`console.log( "${item.tile}", lngLatToTile([${item.lon}, ${item.lat}], ${item.zoom}), lngLatToTile([${item.lon}, ${item.lat}], ${item.zoom}) === '${item.tile}' )`)     
-                  // getTileForCoordAndZoom([e.latlng.lat, e.latlng.lng], zoom, function(tileCoord) {
-                  //     console.log("tileCoord", tileCoord);
-                  //   });
+                     
+                    var item = { 
+                        lat: (e.latlng.lat).toFixed(12), 
+                        lon: (e.latlng.lng).toFixed(12), 
+                        zoom: gridLayer._tileZoom, 
+                        tile: getTileURL(e.latlng.lat, e.latlng.lng, gridLayer._tileZoom)
+                    }
+
+                    createNew([e.latlng.lat, e.latlng.lng], gridLayer._tileZoom)
+
                 });
 
                 if (dataset) load()
+
+                loadLocalPoints()
 
                 if ( dataset && (urlParams.get('refresh') || urlParams.get('a') || urlParams.get('auto')) ) {
                     setInterval(() => {
