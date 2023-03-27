@@ -9,7 +9,7 @@
         <meta name="apple-mobile-web-app-title" content="Blvd">
         <link rel="apple-touch-icon" href="../../icon.png">
         <link rel="icon" type="image/png" href="../../favicon.png" />
-        <title>Online Map - Blvd</title>
+        <title>Map - Blvd</title>
         <link rel="stylesheet" href="../../css/normalize.min.css">
         <link rel='stylesheet' href='../../css/leaflet.css'>
         <link rel='stylesheet' href='../../css/MarkerCluster.css'>
@@ -468,7 +468,11 @@
                         tile: getTileURL(e.latlng.lat, e.latlng.lng, gridLayer._tileZoom)
                     }
 
-                    createNew([e.latlng.lat, e.latlng.lng], gridLayer._tileZoom)
+                    window.alert(`${e.latlng.lat}, ${e.latlng.lng}`)
+
+                    // window.prompt('What')
+
+                    // createNew([e.latlng.lat, e.latlng.lng], gridLayer._tileZoom)
 
                 });
 
