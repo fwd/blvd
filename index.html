@@ -306,7 +306,8 @@
                 var element = document.getElementById("location")
                 element.classList.toggle("active")
                 // window.enabled = !window.enabled
-                if (window.enabled) getLocation()
+                // if (window.enabled) 
+                getLocation()
             }
 
             window.getLocation = function() {
@@ -318,12 +319,12 @@
                 }
             }
 
-            window.interval = setInterval(() => {
-                if (enabled) {
-                    // console.log("Following location..")
-                    getLocation()
-                }
-            }, 10000)
+            // window.interval = setInterval(() => {
+            //     if (enabled) {
+            //         // console.log("Following location..")
+            //         getLocation()
+            //     }
+            // }, 10000)
 
             const urlParams = new URLSearchParams(window.location.search)
 
