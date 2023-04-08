@@ -105,6 +105,10 @@
                 box-sizing: border-box;
             }
 
+            .location.active {
+                filter: invert(1);
+            }
+
             .search input {
               padding: 10px 20px;
             }
@@ -139,7 +143,7 @@
         <!-- partial:index.partial.html -->
         <div id="map"></div>
 
-        <div id="location" class="location " onclick="toggleLocation()">
+        <div id="location" class="location" onclick="toggleLocation()">
             <?xml version="1.0" ?><svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg"><title/><g><path d="M90,42H83.3936A35.9331,35.9331,0,0,0,54,12.6064V6A6,6,0,0,0,42,6v6.6064A35.9331,35.9331,0,0,0,12.6064,42H6A6,6,0,0,0,6,54h6.6064A35.9331,35.9331,0,0,0,42,83.3936V90a6,6,0,0,0,12,0V83.3936A35.9331,35.9331,0,0,0,83.3936,54H90a6,6,0,0,0,0-12ZM48,72A24,24,0,1,1,72,48,24.0238,24.0238,0,0,1,48,72Z"/><path d="M48,36A12,12,0,1,0,60,48,12.0157,12.0157,0,0,0,48,36Z"/></g></svg>
         </div>
 
@@ -264,8 +268,8 @@
             function goToLocation(position) {
 
                 var iconOptions = {
-                   iconUrl: 'icons/location.png',
-                   iconSize: [60, 60]
+                   iconUrl: 'icons/steve.png',
+                   iconSize: [80, 120]
                 }
 
                 // Creating a custom icon
@@ -302,13 +306,15 @@
             }
 
             window.toggleLocation = function() {
-                window.enabled = !window.enabled
+                window.enabled = window.enabled ? false : true
                 var element = document.getElementById("location")
                 element.classList.toggle("active")
-                // window.enabled = !window.enabled
-                // if (window.enabled) 
                 getLocation()
             }
+
+            setInterval(() => {
+                if (window.enabled)  getLocation()
+            }, 5000)
 
             window.getLocation = function() {
                 if (navigator.geolocation) {
@@ -318,13 +324,6 @@
                     window.alert("Location needed for this to work.")
                 }
             }
-
-            // window.interval = setInterval(() => {
-            //     if (enabled) {
-            //         // console.log("Following location..")
-            //         getLocation()
-            //     }
-            // }, 10000)
 
             const urlParams = new URLSearchParams(window.location.search)
 
@@ -360,7 +359,7 @@
               // 地圖圖資
               var gridLayer = L.tileLayer(tileset, {
                 subdomains,
-                maxZoom: 21,
+                maxZoom: 22,
                 attribution: 'Google'
               }).addTo(map)
             
@@ -393,7 +392,7 @@
                 axios.get(dataset)
                   .then(res => {
                     if (res.data.features) {
-                        var places = res.data.features;
+                        var places = res.data.features
                     } else {
                         var places = res.data.map(a => {
                             return  {
@@ -437,28 +436,11 @@
                 }
 
 
-              function getTileURL2(lat, lon, zoom) {
-                    let xtile = parseInt(Math.floor((lon + 180) / 360 * (1 << zoom)));
-                    let ytile = parseInt(Math.floor((1 - Math.log(Math.tan(lat.toRad()) + 1 / Math.cos(lat.toRad())) / Math.PI) / 2 * (1 << zoom)));
-                    return `https://map.blvd.to/mt2/${zoom}/${xtile}/${ytile}`;
-                }
-
                 function getTileURL(lat, lon, zoom) {
                     let xtile = parseInt(Math.floor((lon + 180) / 360 * (1 << zoom)));
                     let ytile = parseInt(Math.floor((1 - Math.log(Math.tan(lat.toRad()) + 1 / Math.cos(lat.toRad())) / Math.PI) / 2 * (1 << zoom)));
-                    // let ytile = parseInt(Math.floor((1 - Math.log(Math.tan(lat.toRad()) + 1 / Math.cos(lat.toRad())) / Math.PI) / 2 * (1 << zoom)));
                     return `https://map.blvd.to/mt2/${zoom}/${xtile}/${ytile}`;
-                    // return xtile + "/" + ytile;
                 }
-
-
-                // }
-              
-                // function divideBy(num) {
-                //     this.x /= num;
-                //     this.y /= num;
-                //     return this;
-                // }
 
                 map.on('click', function(e) {        
                      
@@ -469,11 +451,7 @@
                         tile: getTileURL(e.latlng.lat, e.latlng.lng, gridLayer._tileZoom)
                     }
 
-                    window.alert(`${e.latlng.lat}, ${e.latlng.lng}`)
-
-                    // window.prompt('What')
-
-                    // createNew([e.latlng.lat, e.latlng.lng], gridLayer._tileZoom)
+                    // window.alert(`${e.latlng.lat}, ${e.latlng.lng}`)
 
                 });
 
