@@ -239,7 +239,7 @@
 
                 createForm.style.display = "block"
 
-                createForm.addEventListener("submit", (e) => {
+                createForm.addEventListener("submit", function(e) {
 
                     e.preventDefault();
 
@@ -255,7 +255,7 @@
 
                     localStorage.setItem('points', JSON.stringify(points))
 
-                    setTimeout(() => {
+                    setTimeout(function() {
                         loadLocalPoints()
                     }, 200)
 
@@ -312,7 +312,7 @@
                 getLocation()
             }
 
-            setInterval(() => {
+            setInterval(function() {
                 if (window.enabled)  getLocation()
             }, 5000)
 
@@ -390,11 +390,11 @@
             function load() {
                 markers.clearLayers()
                 axios.get(dataset)
-                  .then(res => {
+                  .then(function(res) {
                     if (res.data.features) {
                         var places = res.data.features
                     } else {
-                        var places = res.data.map(a => {
+                        var places = res.data.map(function(a) {
                             return  {
                                 "type": a.type || "Feature",
                                 "properties": {
@@ -460,7 +460,7 @@
                 loadLocalPoints()
 
                 if ( dataset && (urlParams.get('refresh') || urlParams.get('a') || urlParams.get('auto')) ) {
-                    setInterval(() => {
+                    setInterval(function() {
                         load()
                     }, 5000)
                 }
