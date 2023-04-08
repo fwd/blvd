@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <meta name="apple-mobile-web-app-title" content="Blvd">
+        <link rel="apple-touch-icon" href="../../icon.png">
+        <link rel="icon" type="image/png" href="../../favicon.png" />
+        <title>Map - Blvd</title>
+        <link rel="stylesheet" href="../../css/normalize.min.css">
+        <link rel='stylesheet' href='../../css/leaflet.css'>
+        <link rel='stylesheet' href='../../css/MarkerCluster.css'>
+        <link rel='stylesheet' href='../../css/MarkerCluster.Default.css'>
+        <style>
+            .dark-mode {
+/*                filter: invert(1);*/
+            }
+            .dark-mode #map {
+/*                filter: hue-rotate(-205deg);*/
+            }
+            .dark-mode .location.active {
+                background-color: #c200f2;
+                filter: invert(1);
+            }
+        </style>
+        <script src="https://metrics.bar/js/script.js" id="metrics" async defer></script>
+        <style>
+
+            html,
+            body {
+              width: 100%;
+              height: 100%;
+              padding: 0;
+              margin: 0;
+            }
+            
+            #map {
+              width: 100%;
+              height: 100%;
+            }
+            
+            .marker-cluster-small {
+              background-color: rgba(181, 226, 140, 0.6);
+            }
+            
+            .marker-cluster-small div {
+              background-color: rgba(110, 204, 57, 0.6);
+            }
+            
+            .marker-cluster-medium {
+              background-color: rgba(241, 211, 87, 0.6);
+            }
+            
+            .marker-cluster-medium div {
+              background-color: rgba(240, 194, 12, 0.6);
+            }
+            
+            .marker-cluster-large {
+              background-color: rgba(253, 156, 115, 0.6);
+            }
+            
+            .marker-cluster-large div {
+              background-color: rgba(241, 128, 23, 0.6);
+            }
+            
+            .marker-cluster {
+              background-clip: padding-box;
+              border-radius: 20px;
+            }
+            
+            .marker-cluster div {
+              width: 30px;
+              height: 30px;
+              margin-left: 5px;
+              margin-top: 5px;
+              text-align: center;
+              border-radius: 15px;
+              font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+            }
+            
+            .marker-cluster span {
+              line-height: 30px;
+            }
+            
+            .search {
+              position: absolute;
+              top: 10px;
+              left: 60px;
+              z-index: 999;
+            }
+
+            .location {
+                position: fixed;
+                bottom: 30px;
+                right: 18px;
+                z-index: 9999999999;
+                width: 45px;
+                height: 45px;
+                background: white;
+                padding: 9px;
+                border-radius: 5px;
+                box-sizing: border-box;
+            }
+
+            .location.active {
+                filter: invert(1);
+            }
+
+            .search input {
+              padding: 10px 20px;
+            }
+
+            .leaflet-control-zoom-out, .leaflet-control-zoom-in {
+                display: none !important;
+            }
+
+            #create {
+                position: fixed;
+                z-index: 9999999999;
+                top: 0;
+                bottom: 0;
+                left: 0;
+                height: 100%;
+                width: 100%;
+                background: #FFF;
+                display: flex;
+                align-items: center;
+                flex-direction: column;
+            }
+
+            .leaflet-popup-content {
+                zoom: 1.3;
+            }
+
+        </style>
+    </head>
+    
+    <body>
+
+        <!-- partial:index.partial.html -->
+        <div id="map"></div>
+
+        <div id="location" class="location" onclick="toggleLocation()">
+            <?xml version="1.0" ?><svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg"><title/><g><path d="M90,42H83.3936A35.9331,35.9331,0,0,0,54,12.6064V6A6,6,0,0,0,42,6v6.6064A35.9331,35.9331,0,0,0,12.6064,42H6A6,6,0,0,0,6,54h6.6064A35.9331,35.9331,0,0,0,42,83.3936V90a6,6,0,0,0,12,0V83.3936A35.9331,35.9331,0,0,0,83.3936,54H90a6,6,0,0,0,0-12ZM48,72A24,24,0,1,1,72,48,24.0238,24.0238,0,0,1,48,72Z"/><path d="M48,36A12,12,0,1,0,60,48,12.0157,12.0157,0,0,0,48,36Z"/></g></svg>
+        </div>
+
+        <form id="create" style="display: none">
+            
+            <h2>Add New Point</h2>
+
+            <select id="type">
+                <option value="chicken">chicken</option>
+                <option value="bar">bar</option>
+                <option value="blue">alert</option>
+                <option value="burger">burger</option>
+                <option value="casino">casino</option>
+                <option value="clothing">clothing</option>
+                <option value="cops">cops</option>
+                <option value="disco">disco</option>
+
+                <option value="food">food</option>
+                <option value="garage">mechanic</option>
+
+                <option value="gun">gun</option>
+                <option value="gym">gym</option>
+                <option value="home">home</option>
+                <option value="hospital">hospital</option>
+                <option value="house">house</option>
+                <option value="mazda">mazda</option>
+                <option value="money">money</option>
+                <!-- <option value="motor">motor</option> -->
+                <!-- <option value="nano">nano</option> -->
+                <option value="owned">owned</option>
+                <option value="pin">pin</option>
+                <option value="pizza">pizza</option>
+                <option value="race">race</option>
+                <option value="satellite">satellite</option>
+                <option value="smoothie">smoothie</option>
+                <option value="space">space</option>
+                <option value="special">special</option>
+                <option value="target">target</option>
+                <option value="tattoos">tattoos</option>
+                <option value="unknown">unknown</option>
+
+            </select>
+
+            <textarea id="body" cols="30" rows="10"></textarea>
+
+            <input type="submit" value="Submit">
+            <br>
+            <br>
+            <a href="" onclick="cancel(); return false">Cancel</a>
+
+        </div>
+
+        <div class="search" style="display: none;">
+            <form>
+                <input type="text" placeholder="Search" />
+            </form>
+        </div>
+
+        <script>
+            window.darkMode = false
+            if ( window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ) {
+                document.documentElement.className += 'dark-mode'
+                document.documentElement.style.backgroundColor = '#202124'
+                window.darkMode = true
+            } 
+        </script>
+
+        <!-- partial -->
+        <script src='../../js/leaflet.js'></script>
+        <script src='../../js/leaflet.markercluster.js'></script>
+        <script src='../../js/axios.js'></script>
+
+        <script>
+
+            window.interval = false
+
+            window.enabled = false
+
+            window.last_known = null
+
+            let createForm = document.getElementById("create")
+
+            // createForm.style.display = "none"
+
+            function cancel(coords) {
+                document.getElementById("title") ? document.getElementById("title").value = "" : ''
+                document.getElementById("type") ? document.getElementById("type").value = "" : ''
+                document.getElementById("body") ? document.getElementById("body").value = "" : ''
+                createForm.style.display = "none"
+            }
+
+            function createNew(coords) {
+
+                createForm.style.display = "block"
+
+                createForm.addEventListener("submit", function(e) {
+
+                    e.preventDefault();
+
+                    let type = document.getElementById("type").value;
+                    let body = document.getElementById("body").value;
+
+                    if (!body) return
+
+                    // console.log()
+                    var points = localStorage.getItem('points') ? JSON.parse(localStorage.getItem('points')) : []
+
+                    points.push({ type, html: body, coords })
+
+                    localStorage.setItem('points', JSON.stringify(points))
+
+                    setTimeout(function() {
+                        loadLocalPoints()
+                    }, 200)
+
+                    cancel()
+
+                })
+
+            }
+
+            function goToLocation(position) {
+
+                var iconOptions = {
+                   iconUrl: 'icons/steve.png',
+                   iconSize: [80, 120]
+                }
+
+                // Creating a custom icon
+                var customIcon = L.icon(iconOptions)
+
+                // Options for the marker
+                var markerOptions = {
+                   // clickable: true,
+                   draggable: true,
+                   icon: customIcon
+                }
+
+                if (window.marker) {
+                    window.marker.setLatLng(new L.LatLng(position.coords.latitude, position.coords.longitude),{ draggable:'true' });
+                    map.panTo(new L.LatLng(position.coords.latitude, position.coords.longitude))
+                    // return
+                } else {
+                    window.marker = new L.marker([position.coords.latitude, position.coords.longitude], markerOptions)
+                    marker.on('dragend', function(event){
+                        var marker = event.target;
+                        var position = marker.getLatLng();
+                        marker.setLatLng(new L.LatLng(position.lat, position.lng),{draggable:'true'});
+                        map.panTo(new L.LatLng(position.lat, position.lng))
+                    })
+                    markers.addLayer(marker)
+                }
+
+                last_known = [position.coords.latitude, position.coords.longitude]
+
+                console.log("Now at:", position.coords.latitude, position.coords.longitude)
+
+                map.flyTo( new L.LatLng(position.coords.latitude, position.coords.longitude), 20)
+
+            }
+
+            window.toggleLocation = function() {
+                window.enabled = window.enabled ? false : true
+                var element = document.getElementById("location")
+                element.classList.toggle("active")
+                getLocation()
+            }
+
+            setInterval(function() {
+                if (window.enabled)  getLocation()
+            }, 5000)
+
+            window.getLocation = function() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(goToLocation);
+                    return 
+                } else {
+                    window.alert("Location needed for this to work.")
+                }
+            }
+
+            const urlParams = new URLSearchParams(window.location.search)
+
+            var zoom  = urlParams.get('zoom') || 12
+            var type  = urlParams.get('type') || 'hybrid'
+            var tileset  = urlParams.get('map') || urlParams.get('server') || `https://map.blvd.to/{s}/{z}/{x}/{y}?type=${type}`
+            var dataset = urlParams.get('url') || urlParams.get('points') || urlParams.get('github') || urlParams.get('gist')
+            var subdomains = urlParams.get('subdomains') ? urlParams.get('subdomains').split(',') : ['mt0','mt1','mt2','mt3']
+            
+            var coordinates = ''
+
+            const pathname = window.location.pathname.replace('/', '') || 'miami'
+
+            var center = coordinates ? coordinates.split(',') : [25.761681, -80.191788]
+
+            if (pathname && pathname.includes('@')) {
+                
+                dataset = `https://gist.githubusercontent.com/${pathname.replace('@', '')}/raw/${urlParams.get('file') || 'points'}.json`
+
+            } else {
+                
+                if (pathname && pathname.includes(',')) center = pathname.split(',')
+
+            }
+
+            ;(function(){
+
+              window.map = L.map("map", {
+                center,
+                zoom
+              })
+            
+              // 地圖圖資
+              var gridLayer = L.tileLayer(tileset, {
+                subdomains,
+                maxZoom: 21,
+                attribution: 'Google'
+              }).addTo(map)
+            
+            window.markers = new L.MarkerClusterGroup().addTo(map);
+
+            window.loadLocalPoints = function() {
+                window.markers.clearLayers();
+                var points = localStorage.getItem('points') ? JSON.parse(localStorage.getItem('points')) : []
+                for (var item of points) {
+                    var iconOptions = {
+                       iconUrl: `icons/${item.type}.png`,
+                       iconSize: [50, 50]
+                    }
+                    // Creating a custom icon
+                    var customIcon = L.icon(iconOptions);
+                    // Options for the marker
+                    var markerOptions = {
+                       clickable: true,
+                       // draggable: true,
+                       icon: customIcon
+                    }
+                    markers.addLayer(
+                        L.marker([item.coords[0], item.coords[1]], markerOptions).bindPopup(item.html)
+                    )
+                }
+            }
+
+            function load() {
+                markers.clearLayers()
+                axios.get(dataset)
+                  .then(function(res) {
+                    if (res.data.features) {
+                        var places = res.data.features
+                    } else {
+                        var places = res.data.map(function(a) {
+                            return  {
+                                "type": a.type || "Feature",
+                                "properties": {
+                                    "icon": a.icon,
+                                    "name": a.name || a.title,
+                                    "html": a.body || a.html
+                                },
+                                "geometry": {
+                                    "type": "Point",
+                                    "coordinates": [Number(a.lon), Number(a.lat)]
+                                }
+                            }
+                        })
+                    }
+                    for (var item of places) {
+                        var iconOptions = {
+                           iconUrl: item.properties.icon,
+                           iconSize: [50, 50]
+                        }
+                        // Creating a custom icon
+                        var customIcon = L.icon(iconOptions);
+                        // Options for the marker
+                        var markerOptions = {
+                           clickable: true,
+                           // draggable: true,
+                           icon: customIcon
+                        }
+                        markers.addLayer(
+                            L.marker([item.geometry.coordinates[1], item.geometry.coordinates[0]], markerOptions).bindPopup(item.properties.html)
+                        )
+                    }
+                  });
+              }
+
+              if (typeof(Number.prototype.toRad) === "undefined") {
+                  Number.prototype.toRad = function() {
+                    return this * Math.PI / 180;
+                  }
+                }
+
+
+                function getTileURL(lat, lon, zoom) {
+                    let xtile = parseInt(Math.floor((lon + 180) / 360 * (1 << zoom)));
+                    let ytile = parseInt(Math.floor((1 - Math.log(Math.tan(lat.toRad()) + 1 / Math.cos(lat.toRad())) / Math.PI) / 2 * (1 << zoom)));
+                    return `https://map.blvd.to/mt2/${zoom}/${xtile}/${ytile}`;
+                }
+
+                map.on('click', function(e) {        
+                     
+                    var item = { 
+                        lat: (e.latlng.lat).toFixed(12), 
+                        lon: (e.latlng.lng).toFixed(12), 
+                        zoom: gridLayer._tileZoom, 
+                        tile: getTileURL(e.latlng.lat, e.latlng.lng, gridLayer._tileZoom)
+                    }
+
+                    // window.alert(`${e.latlng.lat}, ${e.latlng.lng}`)
+
+                });
+
+                if (dataset) load()
+
+                loadLocalPoints()
+
+                if ( dataset && (urlParams.get('refresh') || urlParams.get('a') || urlParams.get('auto')) ) {
+                    setInterval(function() {
+                        load()
+                    }, 5000)
+                }
+            
+            })();
+            
+
+        </script>
+
+    </body>
+
+</html>
